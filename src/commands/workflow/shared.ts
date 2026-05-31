@@ -22,6 +22,14 @@ export interface TaskItem {
   done: boolean;
 }
 
+export interface GateItem {
+  id: string;
+  description: string;
+  run: string;
+  level: 'required' | 'optional';
+  stage: 'pre' | 'post';
+}
+
 export interface ApplyInstructions {
   changeName: string;
   changeDir: string;
@@ -37,6 +45,10 @@ export interface ApplyInstructions {
   state: 'blocked' | 'all_done' | 'ready';
   missingArtifacts?: string[];
   instruction: string;
+  gates?: {
+    pre: GateItem[];
+    post: GateItem[];
+  };
 }
 
 // -----------------------------------------------------------------------------

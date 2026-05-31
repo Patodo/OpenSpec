@@ -17,6 +17,7 @@ import { CompletionCommand } from '../commands/completion.js';
 import { FeedbackCommand } from '../commands/feedback.js';
 import { registerConfigCommand } from '../commands/config.js';
 import { registerSchemaCommand } from '../commands/schema.js';
+import { registerGateCommand } from '../commands/gate.js';
 import {
   registerWorkspaceCommand,
   runWorkspaceUpdateForRoot,
@@ -301,6 +302,7 @@ program
 registerSpecCommand(program);
 registerConfigCommand(program);
 registerSchemaCommand(program);
+registerGateCommand(program);
 registerWorkspaceCommand(program);
 registerContextStoreCommand(program);
 registerInitiativeCommand(program);

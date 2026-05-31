@@ -10,6 +10,15 @@ export const ArtifactSchema = z.object({
   requires: z.array(z.string()).default([]),
 });
 
+// Gate definition schema — a quality gate that must pass pre/post implementation
+export const GateSchema = z.object({
+  id: z.string().min(1),
+  description: z.string(),
+  run: z.string().min(1),
+  level: z.enum(['required', 'optional']).default('required'),
+  stage: z.enum(['pre', 'post']),
+});
+
 // Apply phase configuration for schema-aware apply instructions
 export const ApplyPhaseSchema = z.object({
   // Artifact IDs that must exist before apply is available
@@ -18,6 +27,8 @@ export const ApplyPhaseSchema = z.object({
   tracks: z.string().nullable().optional(),
   // Custom guidance for the apply phase
   instruction: z.string().optional(),
+  // Quality gates to execute pre/post implementation
+  gates: z.array(GateSchema).optional(),
 });
 
 // Full schema YAML structure
@@ -32,6 +43,7 @@ export const SchemaYamlSchema = z.object({
 
 // Derived TypeScript types
 export type Artifact = z.infer<typeof ArtifactSchema>;
+export type Gate = z.infer<typeof GateSchema>;
 export type ApplyPhase = z.infer<typeof ApplyPhaseSchema>;
 export type SchemaYaml = z.infer<typeof SchemaYamlSchema>;
 

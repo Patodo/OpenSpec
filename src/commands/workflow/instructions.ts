@@ -281,6 +281,9 @@ export async function generateApplyInstructions(
   const tracksFile = applyConfig?.tracks ?? null;
   const schemaInstruction = applyConfig?.instruction ?? null;
 
+  // Extract gates from schema apply config
+  const gates = applyConfig?.gates ?? [];
+
   // Check which required artifacts are missing
   const missingArtifacts: string[] = [];
   for (const artifactId of requiredArtifactIds) {
@@ -356,6 +359,12 @@ export async function generateApplyInstructions(
     state,
     missingArtifacts: missingArtifacts.length > 0 ? missingArtifacts : undefined,
     instruction,
+    gates: gates.length > 0
+      ? {
+          pre: gates.filter((g) => g.stage === 'pre'),
+          post: gates.filter((g) => g.stage === 'post'),
+        }
+      : undefined,
   };
 }
 
@@ -399,7 +408,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
 }
 
 export function printApplyInstructionsText(instructions: ApplyInstructions): void {
-  const { changeName, schemaName, initiative, contextFiles, progress, tasks, state, missingArtifacts, instruction } = instructions;
+  const { changeName, schemaName, initiative, contextFiles, progress, tasks, state, missingArtifacts, instruction, gates } = instructions;
 
   console.log(`## Apply: ${changeName}`);
   console.log(`Schema: ${schemaName}`);
@@ -448,6 +457,33 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
       console.log(`- ${checkbox} ${task.description}`);
     }
     console.log();
+  }
+
+  // Gates
+  if (gates && (gates.pre.length > 0 || gates.post.length > 0)) {
+    if (gates.pre.length > 0) {
+      console.log('### Gates (Pre-Implementation Baseline)');
+      console.log();
+      console.log('Must pass before starting implementation:');
+      console.log();
+      for (const gate of gates.pre) {
+        const tag = gate.level === 'required' ? '[required]' : '[optional]';
+        console.log(`- ${tag} ${gate.description}: \`${gate.run}\``);
+      }
+      console.log();
+    }
+
+    if (gates.post.length > 0) {
+      console.log('### Gates (Post-Implementation Regression)');
+      console.log();
+      console.log('Must pass after all tasks complete. Failure = introduced by this change:');
+      console.log();
+      for (const gate of gates.post) {
+        const tag = gate.level === 'required' ? '[required]' : '[optional]';
+        console.log(`- ${tag} ${gate.description}: \`${gate.run}\``);
+      }
+      console.log();
+    }
   }
 
   // Instruction

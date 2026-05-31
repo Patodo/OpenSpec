@@ -41,6 +41,11 @@ export function parseSchema(yamlContent: string): SchemaYaml {
   // Check for cycles
   validateNoCycles(schema.artifacts);
 
+  // Check for duplicate gate IDs
+  if (schema.apply?.gates) {
+    validateNoDuplicateGates(schema.apply.gates);
+  }
+
   return schema;
 }
 
@@ -120,5 +125,18 @@ function validateNoCycles(artifacts: Artifact[]): void {
         throw new SchemaValidationError(`Cyclic dependency detected: ${cycle}`);
       }
     }
+  }
+}
+
+/**
+ * Validates that there are no duplicate gate IDs.
+ */
+function validateNoDuplicateGates(gates: { id: string }[]): void {
+  const seen = new Set<string>();
+  for (const gate of gates) {
+    if (seen.has(gate.id)) {
+      throw new SchemaValidationError(`Duplicate gate ID: ${gate.id}`);
+    }
+    seen.add(gate.id);
   }
 }
